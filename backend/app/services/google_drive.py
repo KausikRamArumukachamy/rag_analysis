@@ -1,4 +1,5 @@
 import os
+import json
 import tempfile
 from dotenv import load_dotenv
 from googleapiclient.discovery import build
@@ -9,14 +10,16 @@ from fastapi import UploadFile
 # Load environment variables
 load_dotenv()
 
-SERVICE_ACCOUNT_FILE = os.getenv("SERVICE_ACCOUNT_FILE")  # Path to JSON file
+# Load JSON credentials from environment variable
+service_account_info = json.loads(os.getenv("SERVICE_ACCOUNT_JSON"))
+credentials = service_account.Credentials.from_service_account_info(
+    service_account_info, scopes=["https://www.googleapis.com/auth/drive"]
+)
+
 FOLDER_ID = os.getenv("GOOGLE_DRIVE_FOLDER_ID")
 
 def get_drive_service():
-    """Authenticate with Google Drive API using a service account file."""
-    credentials = service_account.Credentials.from_service_account_file(
-        SERVICE_ACCOUNT_FILE, scopes=["https://www.googleapis.com/auth/drive"]
-    )
+    """Authenticate with Google Drive API using a service account stored in an env variable."""
     return build("drive", "v3", credentials=credentials)
 
 async def upload_to_drive(file: UploadFile):
