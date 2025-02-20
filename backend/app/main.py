@@ -1,6 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import asyncio
+import logging
 from app.routes import upload, query
+from app.keep_alive import keep_server_alive  # Import the keep-alive function
 
 app = FastAPI(title="RAG Market Research Analysis")
 
@@ -19,6 +22,16 @@ app.add_middleware(
 @app.get("/")
 def home():
     return {"message": "Welcome to RAG-powered Report Analysis!"}
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for self-pinging"""
+    return {"status": "ok"}
+
+@app.on_event("startup")
+async def startup_event():
+    """Start the keep-alive ping task when FastAPI starts."""
+    asyncio.create_task(keep_server_alive())  # Runs in the background
 
 if __name__ == "__main__":
     import uvicorn
