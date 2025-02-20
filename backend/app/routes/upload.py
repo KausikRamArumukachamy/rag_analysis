@@ -30,6 +30,12 @@ async def upload_report(file: UploadFile = File(...)):
 
     # The temporary directory is deleted automatically after the "with" block ends
 
+    response_data = { "filename": file.filename, 
+                     "message": "File uploaded, processed, and text extracted successfully",
+                     "google_drive_file_id": drive_file_id}
+
+    print("✅ Successful Response:", response_data)
+
     return {
         "filename": file.filename,
         "message": "File uploaded, processed, and text extracted successfully",
