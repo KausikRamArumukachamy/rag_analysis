@@ -15,7 +15,35 @@ const AnalysisPage = () => {
     const chatHistoryRef = useRef(null);
     const [isLoading, setIsLoading] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
-
+    
+    useEffect(() => {
+        const storedChats = localStorage.getItem("chatSessions");
+        const storedActiveIndex = localStorage.getItem("activeChatIndex");
+    
+        if (storedChats) {
+            setChatSessions(JSON.parse(storedChats));
+        }
+    
+        if (storedActiveIndex !== null) {
+            setActiveChatIndex(JSON.parse(storedActiveIndex)); // Restore the last active chat
+        } else if (storedChats) {
+            setActiveChatIndex(0); // Default to first chat if chats exist
+        }
+    }, []);
+    
+    useEffect(() => {
+        if (chatSessions.length > 0) {
+            localStorage.setItem("chatSessions", JSON.stringify(chatSessions));
+        }
+    }, [chatSessions]);
+    
+    // Save activeChatIndex when it changes
+    useEffect(() => {
+        if (activeChatIndex !== null) {
+            localStorage.setItem("activeChatIndex", JSON.stringify(activeChatIndex));
+        }
+    }, [activeChatIndex]);
+    
 
     const handleSend = async () => {
         if (input.trim() === "") return;
@@ -132,8 +160,10 @@ const AnalysisPage = () => {
 
     const handleNewChat = () => {
         const newChat = { title: `Chat ${chatSessions.length + 1}`, messages: [] };
-        setChatSessions([...chatSessions, newChat]);
+        const updatedChats = [...chatSessions, newChat];
+        setChatSessions(updatedChats);
         setActiveChatIndex(chatSessions.length);
+        localStorage.setItem("chatSessions", JSON.stringify(updatedChats));
     };
 
     const validateFileType = (file) => {
@@ -186,11 +216,19 @@ const AnalysisPage = () => {
         }
     };
     
+    const handleChatSelect = (index) => {
+        if (index !== activeChatIndex) {
+            setActiveChatIndex(index);
+            localStorage.setItem("activeChatIndex", JSON.stringify(index));
+        }
+    };
+       
 
     const handleDeleteChat = (index) => {
         const updatedChats = chatSessions.filter((_, i) => i !== index);
         setChatSessions(updatedChats);
         setActiveChatIndex(updatedChats.length > 0 ? 0 : null);
+        localStorage.setItem("chatSessions", JSON.stringify(updatedChats));
     };
 
     useEffect(() => {
@@ -229,8 +267,10 @@ const AnalysisPage = () => {
                 </button>
                 <div className="chat-history" ref={chatHistoryRef}>
                     {chatSessions.map((chat, index) => (
-                        <div key={index} className={`chat-item ${activeChatIndex === index ? "active-chat" : ""}`}>
-                            <span onClick={() => setActiveChatIndex(index)}>{chat.title}</span>
+                        <div key={index} 
+                            className={`chat-item ${activeChatIndex === index ? "active-chat" : ""}`} 
+                            onClick={() => handleChatSelect(index)}>
+                            <span onClick={() => handleChatSelect(index)}>{chat.title}</span>
                             <button className="delete-chat-button" onClick={() => handleDeleteChat(index)}>✖</button>
                         </div>
                     ))}
