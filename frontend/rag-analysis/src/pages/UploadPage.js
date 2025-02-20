@@ -50,8 +50,10 @@ const UploadPage =() =>{
         formData.append("file", selectedFile);
         setIsLoading(true);
 
+        const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
         try{
-            const response = await fetch("http://127.0.0.1:8000/upload/", {
+            const response = await fetch(`${BACKEND_URL}/upload/`, {
                 method: "POST",
                 body: formData,
             });
