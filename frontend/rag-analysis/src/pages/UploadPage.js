@@ -62,7 +62,7 @@ const UploadPage = () => {
             const data = await response.json();
 
             if (response.ok) {
-                alert(`Upload Successful: ${data.message}`);
+                alert(`Upload Successful`);
                 navigate("/analysis");
             } else {
                 setSelectedFile(null);
