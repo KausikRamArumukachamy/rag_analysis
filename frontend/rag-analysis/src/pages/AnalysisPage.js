@@ -62,7 +62,7 @@ const AnalysisPage = () => {
             return updatedChats;
         });
 
-        const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+        const BACKEND_URL = "https://rag-analysis.onrender.com";
     
         try {
             const response = await axios.get(`${BACKEND_URL}/query/`, {
@@ -162,7 +162,7 @@ const AnalysisPage = () => {
     
         setIsLoading(true);
 
-        const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+        const BACKEND_URL = "https://rag-analysis.onrender.com";
     
         try {
             const response = await fetch(`${BACKEND_URL}/upload/`, {

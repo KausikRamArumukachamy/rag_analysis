@@ -50,7 +50,7 @@ const UploadPage =() =>{
         formData.append("file", selectedFile);
         setIsLoading(true);
 
-        const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+        const BACKEND_URL = "https://rag-analysis.onrender.com";
 
         try{
             const response = await fetch(`${BACKEND_URL}/upload/`, {
