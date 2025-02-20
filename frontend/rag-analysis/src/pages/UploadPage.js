@@ -16,15 +16,12 @@ const UploadPage = () => {
         if (file && validateFileType(file)) {
             setSelectedFile(file);
         } else {
-            alert("Only PDF and Word documents are allowed!");
+            alert("Only PDFs are allowed!");
         }
     };
 
     const validateFileType = (file) => {
-        const allowedExtensions = [".pdf", ".docx"];
-        return allowedExtensions.some((ext) =>
-            file.name.toLowerCase().endsWith(ext)
-        );
+        return file.name.toLowerCase().endsWith(".pdf");
     };
 
     const handleDragOver = (event) => {
@@ -37,7 +34,7 @@ const UploadPage = () => {
         if (file && validateFileType(file)) {
             setSelectedFile(file);
         } else {
-            alert("Only PDF and Word documents are allowed");
+            alert("Only PDFs are allowed");
         }
     };
 
