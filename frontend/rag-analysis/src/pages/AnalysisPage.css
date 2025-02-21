@@ -5,8 +5,6 @@
 /* Main Analysis Container */
 .analysis-container {
     display: flex;
-    /* height: 100vh; */
-    /* width: 100vw; */
     background-color: #f5f5f5;
     flex-direction: row;
 }
@@ -37,7 +35,6 @@
     border-radius: 4px;
     white-space: nowrap;
 }
-
 .file-item {
     display: flex;
     align-items: center;
@@ -318,7 +315,7 @@
 
     .sidebar {
         width: 100%;
-        height: auto;
+        height: 30%;
         min-height: auto;
         border-right: none;
         border-bottom: 2px solid #ccc;
@@ -332,20 +329,20 @@
     }
 
     .chat-item {
-        height: 10vh;
+        min-height: 25px;
         font-size: 13px;
         padding: 3px;
     }
 
     .chat-history {
-        max-height: 20vh; 
+        max-height: 18%; 
         overflow-y: auto;
         margin-top: 10px;
     }
 
     .chat-area {
         width: 100%;
-        min-height: 70vh;
+        min-height: 70%;
         height: 100%;
     }
 
@@ -389,7 +386,7 @@
     }
 
     .chat-item {
-        height: 10vh;
+        min-height: 25px;
         font-size: 13px;
         padding: 3px;
     }
@@ -400,7 +397,7 @@
     }
 
     .chat-history {
-        max-height: 20vh; /* Enables scrolling in the sidebar */
+        max-height: 20%; /* Enables scrolling in the sidebar */
         overflow-y: auto;
     }
 
