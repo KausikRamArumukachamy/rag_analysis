@@ -31,7 +31,7 @@ const AnalysisPage = () => {
             setActiveChatIndex(0); 
         }
     
-        // ✅ Automatically create a new chat session if none exist
+        // Automatically create a new chat session if none exist
         if (!storedChats || JSON.parse(storedChats).length === 0) {
             const initialChat = [{ title: "Chat 1", messages: [] }];
             setChatSessions(initialChat);
