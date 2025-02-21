@@ -13,10 +13,10 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
 PINECONE_INDEX_NAME = os.getenv("PINECONE_INDEX_NAME")
 
-# Initialize Pinecone ✅
+# Initialize Pinecone
 pc = Pinecone(api_key=PINECONE_API_KEY)
 
-# Connect to the existing index ✅
+# Connect to the existing index
 index = pc.Index(PINECONE_INDEX_NAME)
 
 def get_embedding(text: str):

@@ -6,6 +6,7 @@ from app.routes import upload, query
 from app.utils.keep_alive import keep_server_alive
 import os
 import json
+from pinecone import Pinecone
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 from googleapiclient.discovery import build
@@ -25,11 +26,24 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Load environment variables
+load_dotenv()
+
 # Google Drive folder ID where files should be stored (update this with your folder ID)
 DRIVE_FOLDER_ID = os.getenv("GOOGLE_DRIVE_FOLDER_ID")
 
-# Load environment variables
-load_dotenv()
+# Pine cone api key and index name
+PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
+PINECONE_INDEX_NAME = os.getenv("PINECONE_INDEX_NAME", "vector-db")
+
+# Initialize Pinecone
+pc = Pinecone(api_key=PINECONE_API_KEY)
+
+# Connect to the existing index
+try:
+    index = pc.Index(PINECONE_INDEX_NAME)
+except Exception as e:
+    raise RuntimeError(f"Failed to connect to Pinecone index: {e}")
 
 # Load JSON credentials from environment variable
 service_account_info = json.loads(os.getenv("SERVICE_ACCOUNT_JSON"))
@@ -69,16 +83,18 @@ def list_uploaded_files():
         raise HTTPException(status_code=500, detail=f"Error fetching file list: {str(e)}")
     
 @app.delete("/delete_file/")
-def delete_file(file_id: str):
-    """Deletes a specified file from Google Drive using file ID."""
+async def delete_file(file_id: str):
     try:
-        # Delete the file directly using the ID
+        # Remove file from Google Drive
         drive_service.files().delete(fileId=file_id).execute()
-        return JSONResponse(content={"message": f"File with ID '{file_id}' deleted successfully."})
 
+        # Delete related embeddings in Pinecone
+        index.delete(ids=[file_id])
+
+        return {"message": "File and embeddings deleted successfully"}
     except Exception as e:
-        logging.error(f"Error deleting file '{file_id}': {e}")
-        raise HTTPException(status_code=500, detail=f"Error deleting file: {str(e)}")
+        logging.error(f"Error deleting file: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 if __name__ == "__main__":

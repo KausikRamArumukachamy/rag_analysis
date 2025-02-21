@@ -10,7 +10,7 @@ load_dotenv()
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
-PINECONE_INDEX_NAME = os.getenv("PINECONE_INDEX_NAME", "vector-db")  # Default index name
+PINECONE_INDEX_NAME = os.getenv("PINECONE_INDEX_NAME", "vector-db")
 
 if not OPENAI_API_KEY or not PINECONE_API_KEY:
     raise ValueError("❌ Missing API Keys. Check your .env file!")
