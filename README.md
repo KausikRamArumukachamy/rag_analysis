@@ -25,7 +25,7 @@ This project provides a React-based frontend for uploading **PDF** files. It all
 - **React.js**  
 - **CSS (for styling)**  
 - **React Router** (for navigation)  
-- **Fetch API** (for backend communication)  
+- **Fast API** (for backend communication)  
 
 ---
 
