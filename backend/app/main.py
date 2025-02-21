@@ -58,14 +58,28 @@ def list_uploaded_files():
     
     try:
         query = f"'{DRIVE_FOLDER_ID}' in parents and trashed=false"
-        results = drive_service.files().list(q=query, fields="files(name)", pageSize=100).execute()
+        results = drive_service.files().list(q=query, fields="files(id, name)", pageSize=100).execute()
         files = results.get("files", [])
-        file_names = [file["name"] for file in files]
-        return {"files": file_names}
+        
+        # Return both name and ID
+        return {"files": [{"id": file["id"], "name": file["name"]} for file in files]}
     
     except Exception as e:
         logging.error(f"Error fetching file list: {e}")
         raise HTTPException(status_code=500, detail=f"Error fetching file list: {str(e)}")
+    
+@app.delete("/delete_file/")
+def delete_file(file_id: str):
+    """Deletes a specified file from Google Drive using file ID."""
+    try:
+        # Delete the file directly using the ID
+        drive_service.files().delete(fileId=file_id).execute()
+        return JSONResponse(content={"message": f"File with ID '{file_id}' deleted successfully."})
+
+    except Exception as e:
+        logging.error(f"Error deleting file '{file_id}': {e}")
+        raise HTTPException(status_code=500, detail=f"Error deleting file: {str(e)}")
+
 
 if __name__ == "__main__":
     import uvicorn
