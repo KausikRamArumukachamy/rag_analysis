@@ -48,6 +48,9 @@ def generate_response(query: str, retrieved_docs: list):
     Strictly add chart values and labels only if the data is numerical or a historical comparison.
     Set chartNeeded as True only when relevant.
 
+    (Strictly)Also give the relevant lines from the context only if it is possible to do so along with the 
+    response under the heading called 'Source'.
+
     Return the output in this format:
     {{"text": "Response here", 
         "chartNeeded": true/false,
