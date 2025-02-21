@@ -11,6 +11,7 @@ from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 from googleapiclient.discovery import build
 from google.oauth2 import service_account
+import uuid
 
 app = FastAPI(title="RAG Market Research Analysis")
 
@@ -70,46 +71,33 @@ async def startup_event():
 
 @app.get("/uploaded_files/")
 def list_uploaded_files():
-    """Fetches the list of uploaded files from Google Drive"""
+    """Fetches the list of uploaded files from Google Drive."""
     
     try:
         query = f"'{DRIVE_FOLDER_ID}' in parents and trashed=false"
         results = drive_service.files().list(q=query, fields="files(id, name)", pageSize=100).execute()
         files = results.get("files", [])
-        
-        # Return both name and ID
-        return {"files": [{"id": file["id"], "name": file["name"]} for file in files]}
-    
+
+        file_data = [{"id": file["id"], "name": file["name"]} for file in files]
+
+        return {"files": file_data}
+
     except Exception as e:
         logging.error(f"Error fetching file list: {e}")
         raise HTTPException(status_code=500, detail=f"Error fetching file list: {str(e)}")
-    
+
 @app.delete("/delete_file/")
 async def delete_file(file_id: str):
+    """Deletes a file from Google Drive only."""
+    
     try:
-        # Remove file from Google Drive
         drive_service.files().delete(fileId=file_id).execute()
+        return {"message": f"File {file_id} deleted successfully from Google Drive."}
 
-        # Fetch all embeddings related to this file
-        query_result = index.query(
-            namespace="",  # Adjust if using namespaces
-            filter={"filename": {"$eq": file_id}},  # Match metadata filename
-            top_k=1000,  # Fetch all related embeddings
-            include_metadata=False
-        )
-        embedding_ids = [match["id"] for match in query_result["matches"]]
-
-        # Delete related embeddings in Pinecone
-        if embedding_ids:
-            index.delete(ids=embedding_ids)
-            print(f"Deleted {len(embedding_ids)} embeddings for {file_id}")
-        else:
-            print(f"No embeddings found for {file_id}")
-
-        return {"message": "File and embeddings deleted successfully"}
     except Exception as e:
         logging.error(f"Error deleting file: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
 
 
 if __name__ == "__main__":
