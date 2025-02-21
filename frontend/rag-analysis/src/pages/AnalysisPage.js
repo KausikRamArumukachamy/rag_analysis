@@ -29,6 +29,15 @@ const AnalysisPage = () => {
         } else if (storedChats) {
             setActiveChatIndex(0); // Default to first chat if chats exist
         }
+    
+        // ✅ Automatically create a new chat session if none exist
+        if (!storedChats || JSON.parse(storedChats).length === 0) {
+            const initialChat = [{ title: "Chat 1", messages: [] }];
+            setChatSessions(initialChat);
+            setActiveChatIndex(0);
+            localStorage.setItem("chatSessions", JSON.stringify(initialChat));
+            localStorage.setItem("activeChatIndex", JSON.stringify(0));
+        }
     }, []);
     
     useEffect(() => {
