@@ -15,6 +15,7 @@ const AnalysisPage = () => {
     const chatHistoryRef = useRef(null);
     const [isLoading, setIsLoading] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
+    const [uploadedFiles, setUploadedFiles] = useState([]);
     
     useEffect(() => {
         const storedChats = localStorage.getItem("chatSessions");
@@ -52,6 +53,32 @@ const AnalysisPage = () => {
             localStorage.setItem("activeChatIndex", JSON.stringify(activeChatIndex));
         }
     }, [activeChatIndex]);
+
+    //Save the uploaded files name
+    useEffect(() => {
+        const storedFiles = localStorage.getItem("uploadedFiles");
+        if (storedFiles) {
+            setUploadedFiles(JSON.parse(storedFiles));
+        }
+    }, []);
+
+    useEffect(() => {
+        const fetchUploadedFiles = async () => {
+            const BACKEND_URL = "https://rag-analysis.onrender.com";
+            try {
+                const response = await fetch(`${BACKEND_URL}/uploaded_files/`);
+                const data = await response.json();
+                if (response.ok) {
+                    setUploadedFiles(data.files);
+                    localStorage.setItem("uploadedFiles", JSON.stringify(data.files)); // ✅ Store locally too
+                }
+            } catch (error) {
+                console.error("Error fetching uploaded files:", error);
+            }
+        };
+    
+        fetchUploadedFiles();
+    }, []);
     
 
     const handleSend = async () => {
@@ -192,6 +219,20 @@ const AnalysisPage = () => {
         }
     };
 
+    const fetchUploadedFiles = async () => {
+        const BACKEND_URL = "https://rag-analysis.onrender.com";
+        try {
+            const response = await fetch(`${BACKEND_URL}/uploaded_files/`);
+            const data = await response.json();
+            if (response.ok) {
+                setUploadedFiles(data.files);  // ✅ Ensure it stores both `id` and `name`
+                localStorage.setItem("uploadedFiles", JSON.stringify(data.files));
+            }
+        } catch (error) {
+            console.error("Error fetching uploaded files:", error);
+        }
+    };    
+
     const handleUploadFile = async (file) => {
         if (!file) return;
         console.log("Attempting to upload:", file.name);
@@ -214,6 +255,8 @@ const AnalysisPage = () => {
     
             if (response.ok) {
                 alert(`Upload Successful: ${data.message}`);
+                const updatedFiles = [...uploadedFiles, file.name];
+                await fetchUploadedFiles();
             } else {
                 alert(`Upload Failed: ${data.detail || "Unknown error"}`);
             }
@@ -222,8 +265,44 @@ const AnalysisPage = () => {
             alert("Failed to upload the file. Please try again.");
         } finally {
             setIsLoading(false);
+            setSelectedFile(null);
         }
     };
+
+    const [deletingFiles, setDeletingFiles] = useState(new Set());
+
+    const handleDeleteFile = async (fileId) => {
+        if (deletingFiles.has(fileId)) return; // Prevent multiple clicks
+        
+        setDeletingFiles((prev) => new Set(prev).add(fileId)); // Disable button
+
+        const BACKEND_URL = "https://rag-analysis.onrender.com";
+
+        try {
+            const response = await fetch(`${BACKEND_URL}/delete_file/?file_id=${fileId}`, {
+                method: "DELETE",
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                alert(`File removed Successfully`);
+                await fetchUploadedFiles();
+            } else {
+                alert(`Delete Failed: ${data.detail || "Unknown error"}`);
+            }
+        } catch (error) {
+            console.error("Error deleting file:", error);
+            alert("Failed to delete the file. Please try again.");
+        } finally {
+            setDeletingFiles((prev) => {
+                const newSet = new Set(prev);
+                newSet.delete(fileId); // Re-enable button if needed
+                return newSet;
+            });
+        }
+    };
+
     
     const handleChatSelect = (index) => {
         if (index !== activeChatIndex) {
@@ -250,6 +329,18 @@ const AnalysisPage = () => {
         <div className="analysis-container">
             <div className="sidebar">
                 <h3>Chats</h3>
+                {uploadedFiles.length > 0 && (
+                    <div className="uploaded-files-inline">
+                        {uploadedFiles.map((file) => (
+                            <div key={file.id} className="file-item">
+                                <span className="file-name">{file.name}</span>
+                                <button className="delete-file-button" 
+                                        onClick={() => handleDeleteFile(file.id)} 
+                                        disabled={deletingFiles.has(file.id)}>✖</button>
+                            </div>
+                        ))}
+                    </div>
+                )}
                 <button
                     className="new-chat-button"
                     onClick={handleNewChat}

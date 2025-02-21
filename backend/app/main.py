@@ -37,16 +37,18 @@ PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
 PINECONE_INDEX_NAME = os.getenv("PINECONE_INDEX_NAME", "vector-db")
 
 # Initialize Pinecone
-pc = Pinecone(api_key=PINECONE_API_KEY)
-
-# Connect to the existing index
 try:
+    pc = Pinecone(api_key=PINECONE_API_KEY)
     index = pc.Index(PINECONE_INDEX_NAME)
 except Exception as e:
     raise RuntimeError(f"Failed to connect to Pinecone index: {e}")
 
-# Load JSON credentials from environment variable
-service_account_info = json.loads(os.getenv("SERVICE_ACCOUNT_JSON"))
+# Load Google Drive credentials
+service_account_json = os.getenv("SERVICE_ACCOUNT_JSON")
+if not service_account_json:
+    raise ValueError("Missing SERVICE_ACCOUNT_JSON in environment variables.")
+
+service_account_info = json.loads(service_account_json)
 credentials = service_account.Credentials.from_service_account_info(
     service_account_info, scopes=["https://www.googleapis.com/auth/drive"]
 )
@@ -88,8 +90,21 @@ async def delete_file(file_id: str):
         # Remove file from Google Drive
         drive_service.files().delete(fileId=file_id).execute()
 
+        # Fetch all embeddings related to this file
+        query_result = index.query(
+            namespace="",  # Adjust if using namespaces
+            filter={"filename": {"$eq": file_id}},  # Match metadata filename
+            top_k=1000,  # Fetch all related embeddings
+            include_metadata=False
+        )
+        embedding_ids = [match["id"] for match in query_result["matches"]]
+
         # Delete related embeddings in Pinecone
-        index.delete(ids=[file_id])
+        if embedding_ids:
+            index.delete(ids=embedding_ids)
+            print(f"Deleted {len(embedding_ids)} embeddings for {file_id}")
+        else:
+            print(f"No embeddings found for {file_id}")
 
         return {"message": "File and embeddings deleted successfully"}
     except Exception as e:

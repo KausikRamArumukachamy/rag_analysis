@@ -13,7 +13,7 @@ PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
 PINECONE_INDEX_NAME = os.getenv("PINECONE_INDEX_NAME", "vector-db")
 
 if not OPENAI_API_KEY or not PINECONE_API_KEY:
-    raise ValueError("❌ Missing API Keys. Check your .env file!")
+    raise ValueError("Missing API Keys. Check your .env file!")
 
 # Initialize OpenAI API
 openai.api_key = OPENAI_API_KEY
@@ -50,7 +50,7 @@ def split_text(text: str, chunk_size=500):
     return [" ".join(words[i: i + chunk_size]) for i in range(0, len(words), chunk_size)]
 
 def process_and_store_embeddings(extracted_text: str, filename: str):
-    """Stores embeddings in Pinecone instead of FAISS."""
+    """Stores embeddings in Pinecone ensuring uniqueness per file."""
     
     chunks = split_text(extracted_text)
     vectors = []
@@ -58,16 +58,16 @@ def process_and_store_embeddings(extracted_text: str, filename: str):
     for i, chunk in enumerate(chunks):
         embedding = get_embedding(chunk)
         vectors.append({
-            "id": f"{filename}_{i}",
+            "id": f"{filename}_{i}",  # Ensure unique ID per file
             "values": embedding,
             "metadata": {"filename": filename, "text": chunk}
         })
 
     if vectors:
         index.upsert(vectors)  # Upload to Pinecone
-        print(f"✅ Pinecone index updated with {len(vectors)} new chunks!")
+        print(f"Pinecone index updated with {len(vectors)} new chunks for {filename}!")
     else:
-        print("⚠️ No text found for embeddings!")
+        print("No text found for embeddings!")
 
 if __name__ == "__main__":
     print("Run this module through FastAPI!")
