@@ -93,5 +93,3 @@ The file is sent to the backend server at:
 - **Your Name** - *KausikRam Arumukachamy*  
 
 ---
-
-Let me know if you want any modifications! 🚀
