@@ -31,7 +31,7 @@ const AnalysisPage = () => {
             setActiveChatIndex(0); 
         }
     
-        // ✅ Automatically create a new chat session if none exist
+        // Automatically create a new chat session if none exist
         if (!storedChats || JSON.parse(storedChats).length === 0) {
             const initialChat = [{ title: "Chat 1", messages: [] }];
             setChatSessions(initialChat);
@@ -217,7 +217,9 @@ const AnalysisPage = () => {
         } else {
             alert("Only PDF and Word documents are allowed!");
         }
+        event.target.value = "";
     };
+    
 
     const fetchUploadedFiles = async () => {
         const BACKEND_URL = "https://rag-analysis.onrender.com";
@@ -275,19 +277,20 @@ const AnalysisPage = () => {
         if (deletingFiles.has(fileId)) return; // Prevent multiple clicks
         
         setDeletingFiles((prev) => new Set(prev).add(fileId)); // Disable button
-
+    
         const BACKEND_URL = "https://rag-analysis.onrender.com";
-
+    
         try {
             const response = await fetch(`${BACKEND_URL}/delete_file/?file_id=${fileId}`, {
                 method: "DELETE",
             });
-
+    
             const data = await response.json();
-
+    
             if (response.ok) {
                 alert(`File removed Successfully`);
                 await fetchUploadedFiles();
+                setSelectedFile(null);
             } else {
                 alert(`Delete Failed: ${data.detail || "Unknown error"}`);
             }
@@ -302,6 +305,7 @@ const AnalysisPage = () => {
             });
         }
     };
+    
 
     
     const handleChatSelect = (index) => {

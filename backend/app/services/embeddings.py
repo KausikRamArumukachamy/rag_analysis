@@ -4,6 +4,7 @@ import json
 import numpy as np
 from pinecone import Pinecone, ServerlessSpec
 from dotenv import load_dotenv
+import uuid
 
 # Load environment variables
 load_dotenv()
@@ -55,17 +56,19 @@ def process_and_store_embeddings(extracted_text: str, filename: str):
     chunks = split_text(extracted_text)
     vectors = []
 
+    unique_id = str(uuid.uuid4())  # Generate a unique ID for this upload
+
     for i, chunk in enumerate(chunks):
         embedding = get_embedding(chunk)
         vectors.append({
-            "id": f"{filename}_{i}",  # Ensure unique ID per file
+            "id": f"{filename}_{unique_id}_{i}",  # Unique ID per chunk
             "values": embedding,
-            "metadata": {"filename": filename, "text": chunk}
+            "metadata": {"filename": filename, "text": chunk, "upload_id": unique_id}
         })
 
     if vectors:
         index.upsert(vectors)  # Upload to Pinecone
-        print(f"Pinecone index updated with {len(vectors)} new chunks for {filename}!")
+        print(f"Pinecone index updated with {len(vectors)} new chunks for {filename} (ID: {unique_id})!")
     else:
         print("No text found for embeddings!")
 
