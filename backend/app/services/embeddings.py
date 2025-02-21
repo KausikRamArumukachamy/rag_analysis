@@ -25,11 +25,11 @@ pc = Pinecone(api_key=PINECONE_API_KEY)
 if PINECONE_INDEX_NAME not in pc.list_indexes().names():
     pc.create_index(
         name=PINECONE_INDEX_NAME,
-        dimension=1536,  # OpenAI embedding dimension
+        dimension=1536, 
         metric="cosine",
         spec=ServerlessSpec(
             cloud="aws",
-            region="us-west-2"  # Change based on your Pinecone region
+            region="us-west-2"
         )
     )
 
@@ -42,7 +42,7 @@ def get_embedding(text: str):
         model="text-embedding-ada-002",
         input=text
     )
-    return response["data"][0]["embedding"]  # Pinecone requires a list, no need to convert to NumPy
+    return response["data"][0]["embedding"]
 
 def split_text(text: str, chunk_size=500):
     """Splits text into manageable chunks."""

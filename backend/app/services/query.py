@@ -3,7 +3,7 @@ import os
 import numpy as np
 import json
 from dotenv import load_dotenv
-from pinecone import Pinecone  # ✅ Correct way to import Pinecone
+from pinecone import Pinecone
 
 # Load environment variables
 load_dotenv()
@@ -25,7 +25,7 @@ def get_embedding(text: str):
         model="text-embedding-ada-002",
         input=text
     )
-    return np.array(response["data"][0]["embedding"], dtype="float32").tolist()  # Convert to list
+    return np.array(response["data"][0]["embedding"], dtype="float32").tolist()
 
 def search_pinecone(query: str, top_k=3):
     """Search Pinecone for the most relevant chunks."""
@@ -63,7 +63,7 @@ def generate_response(query: str, retrieved_docs: list):
         max_tokens=500
     )
 
-    return json.loads(response["choices"][0]["message"]["content"])  # Ensure JSON response
+    return json.loads(response["choices"][0]["message"]["content"])
 
 if __name__ == "__main__":
     query = input("Enter your search query: ")

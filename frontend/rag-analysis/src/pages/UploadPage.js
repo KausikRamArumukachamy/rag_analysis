@@ -3,7 +3,7 @@ import "./UploadPage.css";
 import { useNavigate } from "react-router-dom";
 import uploadIcon from "../assets/file_img.png";
 import loadingGIF from "../assets/cheems_loading.gif";
-import bgImage from "../assets/bg_upload.jpg"; // Import background image
+import bgImage from "../assets/bg_upload.jpg";
 
 const UploadPage = () => {
     const navigate = useNavigate();

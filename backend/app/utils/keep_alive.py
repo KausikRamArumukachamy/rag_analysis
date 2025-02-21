@@ -2,7 +2,7 @@ import asyncio
 import httpx
 import logging
 
-BACKEND_URL = "https://rag-analysis.onrender.com/health"  # Your Render backend URL
+BACKEND_URL = "https://rag-analysis.onrender.com/health" 
 
 async def keep_server_alive():
     """Pings the server every 10 minutes to prevent Render from sleeping."""

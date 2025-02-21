@@ -25,9 +25,9 @@ const AnalysisPage = () => {
         }
     
         if (storedActiveIndex !== null) {
-            setActiveChatIndex(JSON.parse(storedActiveIndex)); // Restore the last active chat
+            setActiveChatIndex(JSON.parse(storedActiveIndex));
         } else if (storedChats) {
-            setActiveChatIndex(0); // Default to first chat if chats exist
+            setActiveChatIndex(0); 
         }
     
         // ✅ Automatically create a new chat session if none exist

@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import asyncio
 import logging
 from app.routes import upload, query
-from app.utils.keep_alive import keep_server_alive  # Import the keep-alive function
+from app.utils.keep_alive import keep_server_alive
 
 app = FastAPI(title="RAG Market Research Analysis")
 
