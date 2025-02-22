@@ -88,11 +88,51 @@ def list_uploaded_files():
 
 @app.delete("/delete_file/")
 async def delete_file(file_id: str):
-    """Deletes a file from Google Drive only."""
+    """
+    Deletes a file from Google Drive and removes its corresponding embeddings from Pinecone.
     
+    Args:
+        file_id (str): The Google Drive file ID of the PDF to delete.
+    
+    Returns:
+        dict: Success message if deletion is successful.
+    """
     try:
+        # Retrieve the file name using the file_id
+        response = drive_service.files().get(fileId=file_id, fields="name").execute()
+        filename = response.get("name")
+
+        if not filename:
+            raise HTTPException(status_code=404, detail="File not found in Google Drive.")
+
+        # Delete the PDF from Google Drive
         drive_service.files().delete(fileId=file_id).execute()
-        return {"message": f"File {file_id} deleted successfully from Google Drive."}
+        print(f"PDF {file_id} ({filename}) deleted successfully from Google Drive.")
+
+        # Search for the corresponding JSON metadata file
+        json_filename = f"{filename}.json"
+        query = f"'{DRIVE_FOLDER_ID}' in parents and trashed=false and name='{json_filename}'"
+        response = drive_service.files().list(q=query, fields="files(id, name)").execute()
+        json_files = response.get("files", [])
+
+        if json_files:
+            json_file_id = json_files[0]["id"]  # Get JSON file ID
+
+            # Download JSON file and extract embedding IDs
+            request = drive_service.files().get_media(fileId=json_file_id)
+            json_data = json.loads(request.execute().decode("utf-8"))
+            embedding_ids = json_data.get("embedding_ids", [])
+
+            # Delete embeddings from Pinecone
+            if embedding_ids:
+                index.delete(ids=embedding_ids)
+                print(f"Deleted {len(embedding_ids)} embeddings from Pinecone.")
+
+            # Delete the JSON metadata file from Google Drive
+            drive_service.files().delete(fileId=json_file_id).execute()
+            print(f"Deleted JSON metadata file {json_file_id} from Google Drive.")
+
+        return {"message": f"File {filename} (ID: {file_id}) and associated embeddings deleted successfully."}
 
     except Exception as e:
         logging.error(f"Error deleting file: {e}")
