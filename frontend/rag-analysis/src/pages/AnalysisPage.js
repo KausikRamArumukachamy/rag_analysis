@@ -58,28 +58,41 @@ const AnalysisPage = () => {
     useEffect(() => {
         const storedFiles = localStorage.getItem("uploadedFiles");
         if (storedFiles) {
-            setUploadedFiles(JSON.parse(storedFiles));
+            try {
+                setUploadedFiles(JSON.parse(storedFiles) || []);
+            } catch (error) {
+                console.error("Error parsing uploadedFiles:", error);
+                setUploadedFiles([]); // Set a default empty state
+            }
         }
     }, []);
 
+    console.log("Component rendered");
+
     useEffect(() => {
+        console.log("Entered useEffect to fetch uploaded files");
+
         const fetchUploadedFiles = async () => {
             const BACKEND_URL = "https://rag-analysis.onrender.com";
+
             try {
                 const response = await fetch(`${BACKEND_URL}/uploaded_files/`);
                 const data = await response.json();
-                if (response.ok) {
+
+                if (response.ok && Array.isArray(data.files)) {
                     setUploadedFiles(data.files);
-                    localStorage.setItem("uploadedFiles", JSON.stringify(data.files)); // ✅ Store locally too
+                    localStorage.setItem("uploadedFiles", JSON.stringify(data.files));
+                    console.log("Successfully fetched uploaded files:", data.files);
+                } else {
+                    console.error("Unexpected API response:", data);
                 }
             } catch (error) {
                 console.error("Error fetching uploaded files:", error);
             }
         };
-    
+
         fetchUploadedFiles();
-    }, []);
-    
+    }, []);        
 
     const handleSend = async () => {
         if (input.trim() === "") return;
@@ -215,7 +228,7 @@ const AnalysisPage = () => {
             setSelectedFile(file); 
             setTimeout(() => handleUploadFile(file), 0);
         } else {
-            alert("Only PDF and Word documents are allowed!");
+            alert("Only PDFs are allowed!");
         }
         event.target.value = "";
     };
@@ -335,7 +348,7 @@ const AnalysisPage = () => {
                 <h3>Chats</h3>
                 {uploadedFiles.length > 0 && (
                     <div className="uploaded-files-inline">
-                        {uploadedFiles.map((file) => (
+                        {uploadedFiles.filter((file) => file.name.toLowerCase().endsWith(".pdf")).map((file) => (
                             <div key={file.id} className="file-item">
                                 <span className="file-name">{file.name}</span>
                                 <button className="delete-file-button" 

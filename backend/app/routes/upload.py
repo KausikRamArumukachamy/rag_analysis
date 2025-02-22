@@ -23,7 +23,7 @@ async def upload_report(file: UploadFile = File(...)):
         extracted_text = extract_text_from_pdf(temp_file_path)
 
         # Step 5: Process embeddings with extracted text
-        process_and_store_embeddings(extracted_text, file.filename)
+        await process_and_store_embeddings(extracted_text, file.filename)
 
         # Step 6: Upload the PDF to Google Drive
         drive_file_id = await upload_to_drive(file)

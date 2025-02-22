@@ -1,4 +1,5 @@
 import os
+import io
 import json
 import tempfile
 from dotenv import load_dotenv
@@ -48,5 +49,29 @@ async def upload_to_drive(file: UploadFile):
                 media_body=media,
                 fields="id"
             ).execute()
+
+    return uploaded_file.get("id")
+
+async def upload_json_to_drive(filename: str, json_data: dict):
+    """Create a JSON file with the same name as the PDF and upload it to Google Drive."""
+    service = get_drive_service()
+
+    # Convert JSON data to a string and then to a BytesIO stream
+    json_str = json.dumps(json_data, indent=4)
+    json_stream = io.BytesIO(json_str.encode("utf-8"))
+
+    file_metadata = {
+        "name": f"{filename}.json",  # Match the PDF filename
+        "parents": [FOLDER_ID],
+        "mimeType": "application/json"
+    }
+
+    media = MediaIoBaseUpload(json_stream, mimetype="application/json")
+
+    uploaded_file = service.files().create(
+        body=file_metadata,
+        media_body=media,
+        fields="id"
+    ).execute()
 
     return uploaded_file.get("id")
