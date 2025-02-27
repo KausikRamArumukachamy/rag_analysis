@@ -151,12 +151,12 @@ const AnalysisPage = () => {
             const systemResponse = response.data.ai_response.chartNeeded
                 ? {
                       type: "system",
-                      text: response.data.ai_response.text,
-                      chartType: response.data.ai_response.chart.type,
-                      chartLabels: response.data.ai_response.chart.data.labels,
-                      chartValues: response.data.ai_response.chart.data.values,
+                      text: response.data.ai_response.text || "",
+                      chartType:  response.data.ai_response.chart?.type || "",
+                      chartLabels: response.data.ai_response.chart?.data?.labels || [],
+                      chartValues: response.data.ai_response.chart?.data?.values || [],
                   }
-                : { type: "system", text: response.data.ai_response.text };
+                : { type: "system", text: response.data.ai_response.text || "" };
     
             setChatSessions((prevChats) => {
                 let updatedChats = [...prevChats];
@@ -406,8 +406,7 @@ const AnalysisPage = () => {
                                     <ReactMarkdown>{message.text}</ReactMarkdown>
                                 )}
                                 
-                                {message.type === "system" &&
-                                    message.chartLabels &&
+                                {message.chartLabels &&
                                     message.chartValues &&
                                     message.chartLabels.length > 0 &&
                                     message.chartValues.length > 0 && (
@@ -416,8 +415,8 @@ const AnalysisPage = () => {
                                                 <ResponsiveContainer width="100%" height={300}>
                                                     <BarChart
                                                         data={message.chartLabels.map((label, i) => ({
-                                                            name: label,
-                                                            value: message.chartValues[i],
+                                                            name: String(label),  // Ensure label is a string
+                                                            value: Number(message.chartValues[i] || 0),  // Ensure value is a number
                                                         }))}
                                                     >
                                                         <XAxis dataKey="name" />
@@ -433,8 +432,8 @@ const AnalysisPage = () => {
                                                     <PieChart>
                                                         <Pie
                                                             data={message.chartLabels.map((label, i) => ({
-                                                                name: label,
-                                                                value: message.chartValues[i],
+                                                                name: String(label),  
+                                                                value: Number(message.chartValues[i] || 0), 
                                                             }))}
                                                             dataKey="value"
                                                             nameKey="name"
