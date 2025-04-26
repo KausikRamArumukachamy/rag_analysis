@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 from googleapiclient.discovery import build
 from google.oauth2 import service_account
 import uuid
+import base64
 
 app = FastAPI(title="RAG Market Research Analysis")
 
@@ -48,6 +49,10 @@ except Exception as e:
 service_account_json = os.getenv("SERVICE_ACCOUNT_JSON")
 if not service_account_json:
     raise ValueError("Missing SERVICE_ACCOUNT_JSON in environment variables.")
+
+# Decode base64-encoded JSON and parse it
+service_account_json = base64.b64decode(service_account_json).decode("utf-8")
+service_account_info = json.loads(service_account_json)
 
 service_account_info = json.loads(service_account_json)
 credentials = service_account.Credentials.from_service_account_info(

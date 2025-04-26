@@ -55,11 +55,13 @@ def generate_response(query: str, retrieved_docs: list):
     """
 
     response = openai.ChatCompletion.create(
-        model="gpt-4",
+        # model="gpt-4",
+        model = "gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": "You are an AI that provides structured insights."},
             {"role": "user", "content": prompt}
         ],
+        temperature = 0.4,
         max_tokens=500
     )
 

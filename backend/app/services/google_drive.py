@@ -7,14 +7,22 @@ from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseUpload
 from google.oauth2 import service_account
 from fastapi import UploadFile
+import base64
 
 # Load environment variables
 load_dotenv()
 
 # Load JSON credentials from environment variable
-service_account_info = json.loads(os.getenv("SERVICE_ACCOUNT_JSON"))
+# service_account_info = json.loads(os.getenv("SERVICE_ACCOUNT_JSON"))
+
+# Decode the Base64-encoded service account JSON
+creds_b64 = os.getenv("SERVICE_ACCOUNT_JSON")
+creds_json = base64.b64decode(creds_b64).decode("utf-8")  # ✅ decode base64 to JSON string
+creds_dict = json.loads(creds_json)                      # ✅ parse string to dict
+
+
 credentials = service_account.Credentials.from_service_account_info(
-    service_account_info, scopes=["https://www.googleapis.com/auth/drive"]
+    creds_dict, scopes=["https://www.googleapis.com/auth/drive"]
 )
 
 FOLDER_ID = os.getenv("GOOGLE_DRIVE_FOLDER_ID")
