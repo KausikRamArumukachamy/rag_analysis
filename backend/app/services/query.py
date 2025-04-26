@@ -55,18 +55,40 @@ def generate_response(query: str, retrieved_docs: list):
         "chart": {{"type": "bar/pie", "data": {{"labels": [], "values": []}}}}}}
     """
 
-    response = openai.ChatCompletion.create(
-        # model="gpt-4",
-        model = "gpt-3.5-turbo",
-        messages=[
-            {"role": "system", "content": "You are an AI that provides structured insights."},
-            {"role": "user", "content": prompt}
-        ],
-        temperature = 0.6,
-        max_tokens=500
-    )
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are an AI that provides structured insights."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.6,
+            max_tokens=500
+        )
 
-    return json.loads(response["choices"][0]["message"]["content"])
+        # Get the content of the response
+        content = response["choices"][0]["message"].get("content", "")
+
+        # Check if the content is a valid JSON string
+        try:
+            parsed_content = json.loads(content)
+        except json.JSONDecodeError:
+            print(f"❌ Failed to parse JSON: {content}")
+            parsed_content = {
+                "text": "Sorry, I couldn't generate a structured response.",
+                "chartNeeded": False,
+                "chart": {}
+            }
+        
+        return parsed_content
+
+    except Exception as e:
+        print(f"❌ Error generating response: {e}")
+        return {
+            "text": "Sorry, there was an error processing your request. Please try again later.",
+            "chartNeeded": False,
+            "chart": {}
+        }
 
 if __name__ == "__main__":
     query = input("Enter your search query: ")
