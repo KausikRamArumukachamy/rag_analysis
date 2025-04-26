@@ -14,4 +14,4 @@ async def keep_server_alive():
         except Exception as e:
             logging.error(f"Error in keep-alive ping: {e}")
         
-        await asyncio.sleep(49)  # Wait 10 minutes before the next ping
+        await asyncio.sleep(30)  # Wait 10 minutes before the next ping
