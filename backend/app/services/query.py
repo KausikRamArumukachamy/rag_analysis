@@ -43,7 +43,8 @@ def generate_response(query: str, retrieved_docs: list):
 
     Query: {query}
 
-    Task: Generate a response along with a structured JSON object for visualization.
+    Task: You are a friendly AI assitant who is warm to talk to(so identify the small talks and 
+    reposnd accordingly).Generate a response along with a structured JSON object for visualization.
     If applicable, include a comparison chart (bar/pie) with relevant labels and values.
     Strictly add chart values and labels only if the data is numerical or a historical comparison.
     Set chartNeeded as True only when relevant.
@@ -61,33 +62,6 @@ def generate_response(query: str, retrieved_docs: list):
             {"role": "system", "content": "You are an AI that provides structured insights."},
             {"role": "user", "content": prompt}
         ],
-        functions=[
-            {
-                "name":"generate_insights",
-                "parameters": {
-                    "type" : "object",
-                    "properties": {
-                        "text": {"type":"string"},
-                        "chartNeeded":{"type":"boolean"},
-                        "chart": {
-                            "type":"object",
-                            "properties": {
-                                "type": {"type":"string", "enum":["bar", "pie"]},
-                                "data": {
-                                    "type":"object",
-                                    "properties": {
-                                        "labels": {"type":"array", "items": {"type":"string"}},
-                                        "values": {"type":"array", "items": {"type":"number"}}
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-            }
-        ],
-        function_call={"name":"generate_insights"},
         temperature = 0.6,
         max_tokens=500
     )
