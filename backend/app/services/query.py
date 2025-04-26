@@ -61,7 +61,34 @@ def generate_response(query: str, retrieved_docs: list):
             {"role": "system", "content": "You are an AI that provides structured insights."},
             {"role": "user", "content": prompt}
         ],
-        temperature = 0.4,
+        functions=[
+            {
+                "name":"generate_insights",
+                "parameters": {
+                    "type" : "object",
+                    "properties": {
+                        "text": {"type":"string"},
+                        "chartNeeded":{"type":"boolean"},
+                        "chart": {
+                            "type":"object",
+                            "properties": {
+                                "type": {"type":"string", "enum":["bar", "pie"]},
+                                "data": {
+                                    "type":"object",
+                                    "properties": {
+                                        "labels": {"type":"array", "items": {"type":"string"}},
+                                        "values": {"type":"array", "items": {"type":"number"}}
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+            }
+        ],
+        function_call={"name":"generate_insights"},
+        temperature = 0.6,
         max_tokens=500
     )
 
