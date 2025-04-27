@@ -92,10 +92,40 @@ const AnalysisPage = () => {
         };
 
         fetchUploadedFiles();
-    }, []);        
+    }, []);   
+    
+    const checkHealth = async() => {
+        const BACKEND_URL = "https://rag-analysis.onrender.com";
+        try {
+            const response = await axios.get(`${BACKEND_URL}/health/`);
+            return response.data.status === "ok";
+        } catch (error) {
+            console.error("Health check failed:", error);
+            return false;
+        }
+    }
 
     const handleSend = async () => {
         if (input.trim() === "") return;
+        
+        const isHealthy = await checkHealth();
+
+        if (!isHealthy){
+            setIsLoading(true);
+            console.error("Backend not ready yet.");
+
+            let retries=10
+            while(retries>0){
+                if (isHealthy){
+                    setIsLoading(false);
+                    break
+                }else{
+                    await new Promise((resolve) => setTimeout(resolve, 3000));
+                    const isHealthy = await checkHealth();
+                };
+                retries--;
+            }
+        }
     
         setChatSessions((prevChats) => {
             let updatedChats = [...prevChats];
