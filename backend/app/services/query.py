@@ -75,7 +75,7 @@ def generate_response(query: str, retrieved_docs: list):
         except json.JSONDecodeError:
             print(f"❌ Failed to parse JSON: {content}")
             parsed_content = {
-                "text": "Sorry, I couldn't generate a structured response.",
+                "text": "Sorry, I couldn't generate a structured response.Try Again",
                 "chartNeeded": False,
                 "chart": {}
             }
@@ -85,7 +85,7 @@ def generate_response(query: str, retrieved_docs: list):
     except Exception as e:
         print(f"❌ Error generating response: {e}")
         return {
-            "text": "Sorry, there was an error processing your request. Please try again later.",
+            "text": "Sorry, there was an error processing your request. Please try again.",
             "chartNeeded": False,
             "chart": {}
         }
